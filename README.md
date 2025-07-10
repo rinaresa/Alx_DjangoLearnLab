@@ -1,3 +1,3 @@
 # LibraryProject
 
-This is a Django project for the ALX learn Lab. It includes models, views, admin setup, and routing.
+This project was created as part of the ALX Django Learn Lab.It demonstrates how to create a basic Django project and run the development server.
