@@ -14,6 +14,10 @@ class LibraryDetailView(DetailView):
     template_name = 'relationship_app/library_detail.html'
     context_object_name = 'library'
 
-# Simple homepage view
+# Enhanced homepage view
 def home(request):
-    return HttpResponse("<h1>Welcome to the Library App</h1><p>Go to /books/ to view books.</p>")
+    return HttpResponse("""
+        <h1>Welcome to the Library App</h1>
+        <p>Go to <a href="/books/">Books</a> to view books.</p>
+        <p>Example: Try visiting <a href="/library/1/">Library 1</a> for library detail (if it exists).</p>
+    """)
