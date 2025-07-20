@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Library System</title>
+</head>
+<body>
+    <h1>Welcome to our Library System</h1>
+    
+    <h2>Our Libraries:</h2>
+    <ul>
+        {% for library in libraries %}
+            <li>
+                <a href="{% url 'library-detail' library.pk %}">
+                    {{ library.name }} (Class-based View)
+                </a>
+                <br>
+                <a href="{% url 'library-detail-fbv' library.pk %}">
+                    {{ library.name }} (Function-based View)
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+    
+    <p><a href="{% url 'book-list' %}">View All Books</a></p>
+</body>
+</html>
