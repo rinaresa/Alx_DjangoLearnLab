@@ -1,32 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Books Available</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            margin: 40px;
-        }
-        h1 {
-            color: #003366;
-        }
-        ul {
-            padding-left: 20px;
-        }
-        li {
-            margin-bottom: 8px;
-            font-size: 16px;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <title>List of Books</title>
 </head>
 <body>
     <h1>Books Available:</h1>
     <ul>
         {% for book in books %}
-            <li><strong>{{ book.title }}</strong> by {{ book.author.name }}</li>
-        {% empty %}
-            <li>No books available.</li>
+        <li>{{ book.title }} by {{ book.author.name }}</li>
         {% endfor %}
     </ul>
 </body>

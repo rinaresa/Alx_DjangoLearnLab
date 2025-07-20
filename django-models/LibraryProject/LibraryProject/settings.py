@@ -19,6 +19,7 @@ ALLOWED_HOSTS = []
 
 # Application definition
 INSTALLED_APPS = [
+    # Default Django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -26,7 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Local apps
+    # Your apps
     'bookshelf',
     'relationship_app',
 ]
@@ -46,7 +47,7 @@ ROOT_URLCONF = 'LibraryProject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Optional for global templates
+        'DIRS': [BASE_DIR / 'templates'],  # Optional: for global templates
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -83,10 +84,10 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
 
-# Optional: Static files directory
+# Optional: Uncomment this if you plan to store static files globally
 # STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Default primary key field type
