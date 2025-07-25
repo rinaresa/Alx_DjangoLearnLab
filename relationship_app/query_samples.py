@@ -1,32 +1,43 @@
+import sys
+import os
+
+# Add base directory to Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LibraryProject.settings')
+
+import django
+django.setup()
+
 from relationship_app.models import Author, Book, Library, Librarian
 
-# Show all libraries and their books
-libraries = Library.objects.all()
-print("All Libraries:", list(libraries))
-for lib in libraries:
-    print(f"Library ID: {lib.id}, Books: {list(lib.books.all())}")
+# 1. Query all books by a specific author
+def books_by_author(author_name):
+    books = Book.objects.filter(author__name=author_name)
+    print(f"\nBooks by {author_name}:")
+    for book in books:
+        print(f"- {book.title}")
 
-# Get books by Chinua Achebe
-achebe = Author.objects.filter(name="Chinua Achebe").first()
-if achebe:
-    books_by_achebe = Book.objects.filter(author=achebe)
-    print(f"Books by Chinua Achebe: {list(books_by_achebe)}")
-else:
-    print("Author 'Chinua Achebe' not found.")
+# 2. List all books in a library
+def books_in_library(library_name):
+    try:
+        library = Library.objects.get(name=library_name)
+        print(f"\nBooks in {library_name}:")
+        for book in library.books.all():
+            print(f"- {book.title}")
+    except Library.DoesNotExist:
+        print(f"Library '{library_name}' not found.")
 
-# Find a library that has books
-target_library = None
-for lib in libraries:
-    if lib.books.exists():
-        target_library = lib
-        break
+# 3. Retrieve the librarian for a library
+def librarian_for_library(library_name):
+    try:
+        library = Library.objects.get(name=library_name)
+        librarian = Librarian.objects.get(library=library)
+        print(f"\nLibrarian for {library.name}: {librarian.name}")
+    except (Library.DoesNotExist, Librarian.DoesNotExist):
+        print(f"Librarian for '{library_name}' not found.")
 
-if target_library:
-    print(f"Books in library {target_library.id}: {list(target_library.books.all())}")
-    librarian = Librarian.objects.filter(library=target_library).first()
-    if librarian:
-        print(f"Librarian for {target_library.name}: {librarian.name}")
-    else:
-        print(f"No librarian assigned to {target_library.name}")
-else:
-    print("No library with books found.")
+# --- Test Queries ---
+if __name__ == "__main__":
+    books_by_author("Chinua Achebe")
+    books_in_library("Central Library")
+    librarian_for_library("Central Library")
