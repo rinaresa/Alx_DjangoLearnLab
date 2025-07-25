@@ -29,7 +29,7 @@ INSTALLED_APPS = [
 
     # Your apps
     'bookshelf',
-    'relationship_app',
+   'relationship_app',
 ]
 
 MIDDLEWARE = [
