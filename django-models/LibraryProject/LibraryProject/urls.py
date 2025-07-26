@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', lambda request: redirect('book_list')),  # ✅ Redirect root to /books/
     path('', include('relationship_app.urls')),       # ✅ Keep this as is
-]
+    path('dashboard/', role_based_dashboard, name='role_dashboard'),
+] 
