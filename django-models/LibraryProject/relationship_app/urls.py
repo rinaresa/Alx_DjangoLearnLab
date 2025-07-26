@@ -4,7 +4,14 @@ from .views import (
     LibraryDetailView,
     register_view,
     login_view,
-    logout_view
+    logout_view,
+    admin_view,
+    librarian_view,
+    member_view,
+    role_based_dashboard,
+    add_book,
+    edit_book,
+    delete_book,
 )
 
 urlpatterns = [
@@ -15,13 +22,15 @@ urlpatterns = [
     path('register/', register_view, name='register'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
-    path('admin-dashboard/', admin_dashboard, name='admin_dashboard'),
-]
 
-from .views import admin_view, librarian_view, member_view
+    # Role-Based Dashboards
+    path('admin-dashboard/', admin_view, name='admin_dashboard'),
+    path('librarian-dashboard/', librarian_view, name='librarian_dashboard'),
+    path('member-dashboard/', member_view, name='member_dashboard'),
+    path('dashboard/', role_based_dashboard, name='role_based_dashboard'),
 
-urlpatterns += [
-    path('admin-only/', admin_view, name='admin_view'),
-    path('librarian-only/', librarian_view, name='librarian_view'),
-    path('member-only/', member_view, name='member_view'),
+    # ✅ Secured Book Management URLs
+    path('books/add/', add_book, name='add_book'),
+    path('books/edit/<int:book_id>/', edit_book, name='edit_book'),
+    path('books/delete/<int:book_id>/', delete_book, name='delete_book'),
 ]
