@@ -3,3 +3,6 @@
 "/*.pyc" 
 "/venv/" 
 "/.env" 
+"/django-models/" 
+"/advanced_features_and_security/db.sqlite3" 
+"/advanced_features_and_security/manage.py" 
