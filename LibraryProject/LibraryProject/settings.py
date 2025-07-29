@@ -12,8 +12,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings
 SECRET_KEY = 'django-insecure-ngqgrh!t@jct)56h=#=6%nsilks_&qd-cn(qq-k_l^k(4v!5_)'
-DEBUG = True
-ALLOWED_HOSTS = []
+
+# SECURITY: Disable debug in production
+DEBUG = False
+
+# SECURITY: Define allowed hosts
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # Application definition
 INSTALLED_APPS = [
@@ -23,11 +27,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # Your custom apps
     'advanced_features_and_security.apps.AdvancedFeaturesAndSecurityConfig',
     'bookshelf',
     'relationship_app',
+
+    # Optional: For CSP if you use django-csp
+    # 'csp',
 ]
 
 MIDDLEWARE = [
@@ -38,6 +45,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # Optional: For CSP
+    # 'csp.middleware.CSPMiddleware',
 ]
 
 ROOT_URLCONF = 'LibraryProject.urls'
@@ -74,18 +84,10 @@ AUTH_USER_MODEL = 'advanced_features_and_security.CustomUser'
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 # Internationalization
@@ -108,3 +110,27 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Login settings
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# -----------------------
+# ✅ SECURITY SETTINGS
+# -----------------------
+
+# SECURITY: Prevent XSS attacks using browser filters
+SECURE_BROWSER_XSS_FILTER = True
+
+# SECURITY: Prevent content-type sniffing
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# SECURITY: Prevent the site from being framed (clickjacking protection)
+X_FRAME_OPTIONS = 'DENY'
+
+# SECURITY: Ensure cookies are sent over HTTPS only (set True in production)
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+# -----------------------
+# ✅ OPTIONAL CSP SETTINGS (Enable when using django-csp)
+# -----------------------
+# CSP_DEFAULT_SRC = ("'self'",)
+# CSP_SCRIPT_SRC = ("'self'", 'https://cdnjs.cloudflare.com')
+# CSP_STYLE_SRC = ("'self'", 'https://cdnjs.cloudflare.com')
