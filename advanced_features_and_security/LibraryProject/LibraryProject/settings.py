@@ -82,26 +82,22 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-# 🔒 Security Enhancements and HTTPS enforcement
-SECURE_BROWSER_XSS_FILTER = True              # Enable browser's XSS filtering
-X_FRAME_OPTIONS = 'DENY'                       # Prevent clickjacking by disallowing framing
-SECURE_CONTENT_TYPE_NOSNIFF = True             # Prevent MIME-type sniffing
+# Security Enhancements and HTTPS enforcement
+SECURE_BROWSER_XSS_FILTER = True            # Enable browser's XSS filtering
+X_FRAME_OPTIONS = 'DENY'                     # Prevent clickjacking by disallowing framing
+SECURE_CONTENT_TYPE_NOSNIFF = True           # Prevent MIME-type sniffing
 
-# ... other settings above ...
-
-# Security Settings for HTTPS enforcement and proxy headers
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True               # Redirect all HTTP to HTTPS in production
+    SECURE_HSTS_SECONDS = 31536000           # HTTP Strict Transport Security duration (1 year)
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True    # Apply HSTS to all subdomains
+    SECURE_HSTS_PRELOAD = True                # Allow browsers to preload HSTS settings
+    CSRF_COOKIE_SECURE = True                 # Secure CSRF cookie over HTTPS only
+    SESSION_COOKIE_SECURE = True              # Secure session cookie over HTTPS only
 
-    # Trust the X-Forwarded-Proto header from proxy/load balancer
+    # Trust X-Forwarded-Proto header for HTTPS detection behind proxy
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 else:
     SECURE_SSL_REDIRECT = False
-
-# Additional security headers
-SECURE_BROWSER_XSS_FILTER = True
-X_FRAME_OPTIONS = 'DENY'
-SECURE_CONTENT_TYPE_NOSNIFF = True
-
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
