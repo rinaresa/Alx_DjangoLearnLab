@@ -2,32 +2,32 @@ from rest_framework import generics, permissions
 from .models import Book
 from .serializers import BookSerializer
 
-# List all books
+# GET /books/ – public access
 class BookListView(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.AllowAny]  # Read access for all
+    permission_classes = [permissions.AllowAny]
 
-# Get book by ID
+# GET /books/<pk>/ – public access
 class BookDetailView(generics.RetrieveAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.AllowAny]  # Read access for all
+    permission_classes = [permissions.AllowAny]
 
-# Create new book
+# POST /books/create/ – authenticated only
 class BookCreateView(generics.CreateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Only logged-in users
+    permission_classes = [permissions.IsAuthenticated]
 
-# Update existing book
+# PUT/PATCH /books/update/<pk>/ – authenticated only
 class BookUpdateView(generics.UpdateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Only logged-in users
+    permission_classes = [permissions.IsAuthenticated]
 
-# Delete a book
+# DELETE /books/delete/<pk>/ – authenticated only
 class BookDeleteView(generics.DestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Only logged-in users
+    permission_classes = [permissions.IsAuthenticated]
