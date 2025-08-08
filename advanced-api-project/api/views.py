@@ -1,6 +1,7 @@
-from django_filters import rest_framework as filters  # already added ✅
+from django_filters import rest_framework as filters
 from rest_framework import generics, permissions
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.filters import OrderingFilter  # ✅ this import is required
 from .models import Book
 from .serializers import BookSerializer
 
@@ -15,11 +16,11 @@ class BookFilter(filters.FilterSet):
         fields = ['title', 'author__name', 'publication_year']
 
 
-# GET /books/?title=&author__name=&publication_year=
+# GET /books/?title=&author__name=&publication_year=&ordering=title
 class BookListView(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-    filter_backends = [filters.DjangoFilterBackend]
+    filter_backends = [filters.DjangoFilterBackend, OrderingFilter]  # ✅ must include this
     filterset_class = BookFilter
     ordering_fields = ['title', 'publication_year']
