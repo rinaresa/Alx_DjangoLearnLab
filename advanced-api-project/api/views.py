@@ -1,25 +1,45 @@
-from django_filters import rest_framework
-from rest_framework import generics, permissions
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from rest_framework.filters import OrderingFilter
+from rest_framework import viewsets, filters
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Book
 from .serializers import BookSerializer
 
-
-class BookFilter(rest_framework.FilterSet):
-    title = rest_framework.CharFilter(lookup_expr='icontains')
-    author__name = rest_framework.CharFilter(field_name='author__name', lookup_expr='icontains')
-    publication_year = rest_framework.NumberFilter()
-
-    class Meta:
-        model = Book
-        fields = ['title', 'author__name', 'publication_year']
-
-
-class BookListView(generics.ListAPIView):
+class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    filter_backends = [rest_framework.DjangoFilterBackend, OrderingFilter]
-    filterset_class = BookFilter
-    ordering_fields = ['title', 'publication_year']
+    
+    # Step 1: Set up filtering
+    filter_backends = [
+        DjangoFilterBackend,       # for field filtering
+        filters.SearchFilter,      # for search functionality
+        filters.OrderingFilter,    # for ordering results
+    ]
+    
+    # Fields to filter by (exact match)
+    filterset_fields = [
+        'title', 
+        'author', 
+        'publication_year',
+        # add any other fields you want to filter by
+    ]
+    
+    # Step 2: Implement search functionality
+    search_fields = [
+        'title',          # will search in title field
+        'author',         # will search in author field
+        # you can also do related lookups or partial matches:
+        # '^title',       # starts-with search
+        # '=title',       # exact match
+        # '@title',       # full-text search (if supported)
+    ]
+    
+    # Step 3: Configure ordering
+    ordering_fields = [
+        'title',
+        'author',
+        'publication_year',
+        'created_at',
+        # add any other fields you want to allow ordering by
+    ]
+    
+    # Default ordering if none is specified
+    ordering = ['title']
