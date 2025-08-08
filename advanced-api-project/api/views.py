@@ -22,3 +22,4 @@ class BookListView(generics.ListAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = BookFilter
+    ordering_fields = ['title', 'publication_year']
