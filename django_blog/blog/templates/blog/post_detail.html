@@ -38,16 +38,16 @@
             <p>No comments yet.</p>
         {% endfor %}
         
-        {% if user.is_authenticated %}
-            <h4>Add a comment</h4>
-            <form method="post">
-                {% csrf_token %}
-                {{ comment_form.as_p }}
-                <button type="submit" class="btn-submit">Submit</button>
-            </form>
-        {% else %}
-            <p><a href="{% url 'login' %}">Login</a> to leave a comment.</p>
-        {% endif %}
+       {% if user.is_authenticated %}
+    <h4>Add a comment</h4>
+    <form method="post" action="{% url 'comment-create' post.pk %}">
+        {% csrf_token %}
+        {{ comment_form.as_p }}
+        <button type="submit" class="btn-submit">Submit</button>
+    </form>
+{% else %}
+    <p><a href="{% url 'login' %}">Login</a> to leave a comment.</p>
+{% endif %}
     </section>
 </article>
 {% endblock %}
