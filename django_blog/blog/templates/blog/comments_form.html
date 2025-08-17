@@ -1,0 +1,13 @@
+{% extends "blog/base.html" %}
+
+{% block content %}
+<div class="comment-form">
+    <h2>{% if object %}Edit{% else %}Add{% endif %} Comment</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-submit">Save</button>
+        <a href="{{ view.get_success_url }}" class="btn-cancel">Cancel</a>
+    </form>
+</div>
+{% endblock %}
