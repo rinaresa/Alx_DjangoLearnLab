@@ -1,17 +1,78 @@
+/* Basic reset and typography */
 body {
+    margin: 0;
     font-family: Arial, sans-serif;
     line-height: 1.6;
-    margin: 0;
-    padding: 20px;
 }
 
-header {
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+/* Header styles */
+.site-header {
     background: #333;
-    color: #fff;
-    padding: 10px 20px;
+    color: white;
+    padding: 1rem 0;
 }
 
-header a {
-    color: #fff;
+.site-header a {
+    color: white;
     text-decoration: none;
+}
+
+.site-header h1 {
+    margin: 0;
+}
+
+/* Navigation */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.navbar a {
+    margin-left: 1rem;
+    padding: 0.5rem;
+}
+
+.navbar a:hover {
+    text-decoration: underline;
+}
+
+/* Messages */
+.messages {
+    margin: 1rem 0;
+}
+
+.alert {
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+/* Footer */
+.site-footer {
+    background: #333;
+    color: white;
+    padding: 1rem 0;
+    margin-top: 2rem;
 }
