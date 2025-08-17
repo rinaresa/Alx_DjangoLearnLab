@@ -1,0 +1,12 @@
+{% extends "blog/base.html" %}
+
+{% block content %}
+    <h2>Search Results</h2>
+    {% if posts %}
+        {% for post in posts %}
+            {% include "blog/post_card.html" %}
+        {% endfor %}
+    {% else %}
+        <p>No posts found matching your query.</p>
+    {% endif %}
+{% endblock %}

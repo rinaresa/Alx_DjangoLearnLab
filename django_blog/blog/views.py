@@ -10,6 +10,30 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import DeleteView, UpdateView,ListView, DetailView, CreateView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Q
+from taggit.models import Tag
+
+def post_search(request):
+    query = request.GET.get('q')
+    tag = request.GET.get('tag')
+    
+    if tag:
+        posts = Post.objects.filter(tags__name__in=[tag])
+    elif query:
+        posts = Post.objects.filter(
+            Q(title__icontains=query) | 
+            Q(content__icontains=query) |
+            Q(tags__name__icontains=query)
+        ).distinct()
+    else:
+        posts = Post.objects.none()
+    
+    return render(request, 'blog/post_search.html', {'posts': posts})
+
+def tagged_posts(request, tag_slug):
+    tag = get_object_or_404(Tag, slug=tag_slug)
+    posts = Post.objects.filter(tags__name__in=[tag])
+    return render(request, 'blog/tagged_posts.html', {'tag': tag, 'posts': posts})
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment

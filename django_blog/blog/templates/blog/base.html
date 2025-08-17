@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Django Blog{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'blog/css/style.css' %}">
     {% load static %}
+    <link rel="stylesheet" href="{% static 'blog/css/style.css' %}">
 </head>
 <body>
     <header class="site-header">
@@ -16,6 +16,15 @@
                     <a href="{% url 'blog-home' %}">Home</a>
                     <a href="{% url 'post-create' %}">New Post</a>
                 </div>
+                
+                <!-- Search form -->
+                <div class="navbar-center">
+                    <form class="search-form" action="{% url 'post-search' %}" method="get">
+                        <input type="text" name="q" placeholder="Search posts...">
+                        <button type="submit">Search</button>
+                    </form>
+                </div>
+
                 <div class="navbar-right">
                     {% if user.is_authenticated %}
                         <a href="{% url 'profile' %}">Profile</a>
