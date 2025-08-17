@@ -5,7 +5,8 @@ from .views import (
     PostListView, PostDetailView,
     PostCreateView, PostUpdateView,
     PostDeleteView, CommentCreateView,
-    CommentUpdateView, CommentDeleteView
+    CommentUpdateView, CommentDeleteView,
+    PostByTagListView  # ✅ import class-based view
 )
 
 urlpatterns = [
@@ -27,6 +28,7 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(template_name='blog/logout.html'), name='logout'),
     path('profile/', views.profile, name='profile'),
 
-    path('search/', post_search, name='post-search'),
-    path('tags/<slug:tag_slug>/', tagged_posts, name='tagged-posts'),
+    # Search & Tags
+    path('search/', views.post_search, name='post-search'),
+    path('tags/<slug:tag_slug>/', PostByTagListView.as_view(), name='tagged-posts'),  # ✅ updated
 ]
