@@ -167,3 +167,21 @@ body {
     color: white;
     border: none;
 }
+
+/* Tag input styling */
+.tag-input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.tagify__tag {
+    background: #007bff;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    margin: 0.2rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    display: inline-block;
+}
