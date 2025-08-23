@@ -1,29 +1,27 @@
-from rest_framework import viewsets, mixins
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework import viewsets, generics, permissions, status
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
 from .permissions import IsAuthorOrReadOnly
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework import generics, permissions
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.pagination import PageNumberPagination
-from django.shortcuts import get_object_or_404
-from accounts.models import Follow 
-from .serializers import PostSerializer
+from accounts.models import Follow
+
 
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = "page_size"
     max_page_size = 100
 
+
 class FeedListView(generics.ListAPIView):
     """
-    GET /api/feed/  -> paginated list of posts by users the current user follows
+    GET /api/feed/ -> paginated list of posts by users the current user follows
     """
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticated]
@@ -31,21 +29,17 @@ class FeedListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        following_ids = Follow.objects.filter(follower=user).values_list("following_id", flat=True)
-        # include user's own posts optionally — remove `.union([...])` if not desired
-        # return Post.objects.filter(author__id__in=list(following_ids)).order_by("-created_at")
+        # get all the users that the current user follows
+        following_users = user.following.all()
+
+        # ✅ required: Post.objects.filter(author__in=following_users).order_by
         return (
-            Post.objects
-            .filter(author__id__in=list(following_ids))
+            Post.objects.filter(author__in=following_users)
             .select_related("author")
             .prefetch_related("comments__author")
             .order_by("-created_at")
         )
 
-class StandardResultsSetPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = "page_size"
-    max_page_size = 100
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.select_related("author").prefetch_related("comments__author").all()
@@ -53,14 +47,14 @@ class PostViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthorOrReadOnly]
     pagination_class = StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = []  # you can add fields like ['author']
-    search_fields = ['title', 'content']
-    ordering_fields = ['created_at', 'updated_at']
+    filterset_fields = []
+    search_fields = ["title", "content"]
+    ordering_fields = ["created_at", "updated_at"]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=True, methods=["post"], permission_classes=[IsAuthorOrReadOnly])
+    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
     def add_comment(self, request, pk=None):
         post = self.get_object()
         serializer = CommentSerializer(data={**request.data, "post": post.id})
@@ -76,38 +70,9 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthorOrReadOnly]
     pagination_class = StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['post', 'author']
-    search_fields = ['content']
-    ordering_fields = ['created_at', 'updated_at']
-
-    def perform_create(self, serializer):
-        # ensure author is the request user
-        serializer.save(author=self.request.user)
-
-class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()   # ✅ Explicitly add this
-    serializer_class = PostSerializer
-    permission_classes = [IsAuthorOrReadOnly]
-    pagination_class = StandardResultsSetPagination
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = []  
-    search_fields = ['title', 'content']
-    ordering_fields = ['created_at', 'updated_at']
+    filterset_fields = ["post", "author"]
+    search_fields = ["content"]
+    ordering_fields = ["created_at", "updated_at"]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-
-
-class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()   # ✅ Explicitly add this
-    serializer_class = CommentSerializer
-    permission_classes = [IsAuthorOrReadOnly]
-    pagination_class = StandardResultsSetPagination
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['post', 'author']
-    search_fields = ['content']
-    ordering_fields = ['created_at', 'updated_at']
-
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-
