@@ -9,6 +9,38 @@ from .permissions import IsAuthorOrReadOnly
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import generics, permissions
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
+from django.shortcuts import get_object_or_404
+from accounts.models import Follow 
+from .serializers import PostSerializer
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = "page_size"
+    max_page_size = 100
+
+class FeedListView(generics.ListAPIView):
+    """
+    GET /api/feed/  -> paginated list of posts by users the current user follows
+    """
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        user = self.request.user
+        following_ids = Follow.objects.filter(follower=user).values_list("following_id", flat=True)
+        # include user's own posts optionally — remove `.union([...])` if not desired
+        # return Post.objects.filter(author__id__in=list(following_ids)).order_by("-created_at")
+        return (
+            Post.objects
+            .filter(author__id__in=list(following_ids))
+            .select_related("author")
+            .prefetch_related("comments__author")
+            .order_by("-created_at")
+        )
 
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 10
