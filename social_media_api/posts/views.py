@@ -51,3 +51,31 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # ensure author is the request user
         serializer.save(author=self.request.user)
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()   # ✅ Explicitly add this
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthorOrReadOnly]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = []  
+    search_fields = ['title', 'content']
+    ordering_fields = ['created_at', 'updated_at']
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()   # ✅ Explicitly add this
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthorOrReadOnly]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['post', 'author']
+    search_fields = ['content']
+    ordering_fields = ['created_at', 'updated_at']
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
