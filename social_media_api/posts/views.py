@@ -1,5 +1,4 @@
 from rest_framework import viewsets, generics, permissions, status
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -24,7 +23,7 @@ class FeedListView(generics.ListAPIView):
     GET /api/feed/ -> paginated list of posts by users the current user follows
     """
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]  # Changed to use permissions.IsAuthenticated
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
@@ -54,7 +53,7 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated])  # Changed here too
     def add_comment(self, request, pk=None):
         post = self.get_object()
         serializer = CommentSerializer(data={**request.data, "post": post.id})
