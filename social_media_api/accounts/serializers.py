@@ -1,62 +1,37 @@
-from django.contrib.auth import get_user_model
-from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from rest_framework.authtoken.models import Token
 
 User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    followers_count = serializers.SerializerMethodField()
-    following_count = serializers.SerializerMethodField()
-    profile_picture_url = serializers.SerializerMethodField()
-
+    """
+    Serializer for listing and retrieving user details.
+    """
     class Meta:
         model = User
-        fields = [
-            "id", "username", "email", "bio", "profile_picture_url",
-            "followers_count", "following_count",
-        ]
-        read_only_fields = ["id", "followers_count", "following_count", "profile_picture_url"]
-
-    def get_followers_count(self, obj):
-        return obj.followers.count()
-
-    def get_following_count(self, obj):
-        return obj.following.count()
-
-    def get_profile_picture_url(self, obj):
-        request = self.context.get("request")
-        if obj.profile_picture and hasattr(obj.profile_picture, "url"):
-            url = obj.profile_picture.url
-            return request.build_absolute_uri(url) if request else url
-        return None
+        fields = ["id", "username", "email", "bio", "profile_picture", "followers"]
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user registration.
+    Automatically creates a Token for the new user.
+    """
     password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ["username", "email", "password"]
-
-    def validate_password(self, value):
-        validate_password(value)
-        return value
+        fields = ["id", "username", "email", "password"]
 
     def create(self, validated_data):
-        password = validated_data.pop("password")
-        user = User(**validated_data)
-        user.set_password(password)
-        user.save()
+        # Create user with hashed password
+        user = User.objects.create_user(
+            username=validated_data["username"],
+            email=validated_data.get("email", ""),
+            password=validated_data["password"],
+        )
+        # Generate token for the new user
+        Token.objects.create(user=user)
         return user
-
-
-class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
-
-
-class ProfileUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["username", "email", "bio", "profile_picture"]
