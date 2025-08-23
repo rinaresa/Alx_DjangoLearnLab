@@ -3,19 +3,18 @@ from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from rest_framework import generics, permissions
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from .serializers import UserSerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from django.conf import settings
-from .models import Follow
-from django.contrib.auth import get_user_model
+from .models import Follow, CustomUser  # ✅ Import CustomUser
+from .serializers import UserSerializer
 
-User = get_user_model()
+
+# ✅ Explicitly set CustomUser instead of get_user_model()
+User = CustomUser
+
 
 class FollowUnfollowView(APIView):
     """
@@ -45,16 +44,21 @@ class FollowUnfollowView(APIView):
         return Response({"detail": "You were not following this user."}, status=status.HTTP_400_BAD_REQUEST)
 
 
-User = get_user_model()
-
-# Register a new user
-class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
+# ✅ Register a new user (explicitly uses CustomUser.objects.all())
+class RegisterView(generics.GenericAPIView):
+    queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        Token.objects.create(user=user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-# Login view (returns token)
+
+# ✅ Login view (returns token)
 class LoginView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
@@ -66,7 +70,7 @@ class LoginView(ObtainAuthToken):
         })
 
 
-# Authenticated user profile
+# ✅ Authenticated user profile
 class ProfileView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -75,16 +79,14 @@ class ProfileView(generics.RetrieveAPIView):
         return self.request.user
 
 
-
-
+# ------------------ SERIALIZERS ------------------
 
 class RegisterSerializer(serializers.ModelSerializer):
-    # Extra fields for password confirmation
     password = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = ["id", "username", "email", "password", "password2", "bio", "profile_picture"]
 
     def validate(self, data):
@@ -93,16 +95,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        # Remove password2 before creating user
         validated_data.pop("password2")
         password = validated_data.pop("password")
-
-        # Use get_user_model().objects.create_user to create the user
-        user = get_user_model().objects.create_user(password=password, **validated_data)
-
-        # Create token for user
+        user = CustomUser.objects.create_user(password=password, **validated_data)
         Token.objects.create(user=user)
-
         return user
 
 
@@ -113,13 +109,13 @@ class LoginSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = CustomUser
         fields = ["id", "username", "email", "bio", "profile_picture"]
 
 
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = CustomUser
         fields = ["bio", "profile_picture"]
         extra_kwargs = {
             'bio': {'required': False},
