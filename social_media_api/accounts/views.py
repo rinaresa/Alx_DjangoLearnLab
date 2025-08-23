@@ -1,68 +1,54 @@
-from django.contrib.auth import authenticate, get_user_model
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
+from django.contrib.auth import get_user_model
+from rest_framework import serializers
 from rest_framework.authtoken.models import Token
-from rest_framework.parsers import MultiPartParser, FormParser
-
-from .serializers import (
-    RegisterSerializer,
-    LoginSerializer,
-    UserSerializer,
-    ProfileUpdateSerializer,
-)
 
 User = get_user_model()
 
 
-class RegisterView(APIView):
-    permission_classes = [permissions.AllowAny]
+class RegisterSerializer(serializers.ModelSerializer):
+    # Extra fields for password confirmation
+    password = serializers.CharField(write_only=True)
+    password2 = serializers.CharField(write_only=True)
 
-    def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            token, _ = Token.objects.get_or_create(user=user)
-            return Response({
-                "user": UserSerializer(user, context={"request": request}).data,
-                "token": token.key,
-            }, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    class Meta:
+        model = User
+        fields = ["id", "username", "email", "password", "password2", "bio", "profile_picture"]
 
+    def validate(self, data):
+        if data["password"] != data["password2"]:
+            raise serializers.ValidationError("Passwords do not match.")
+        return data
 
-class LoginView(APIView):
-    permission_classes = [permissions.AllowAny]
+    def create(self, validated_data):
+        # Remove password2 before creating user
+        validated_data.pop("password2")
+        password = validated_data.pop("password")
 
-    def post(self, request):
-        serializer = LoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        # Use get_user_model().objects.create_user to create the user
+        user = get_user_model().objects.create_user(password=password, **validated_data)
 
-        username = serializer.validated_data["username"]
-        password = serializer.validated_data["password"]
+        # Create token for user
+        Token.objects.create(user=user)
 
-        user = authenticate(request, username=username, password=password)
-        if not user:
-            return Response({"detail": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
-
-        token, _ = Token.objects.get_or_create(user=user)
-        return Response({
-            "user": UserSerializer(user, context={"request": request}).data,
-            "token": token.key,
-        })
+        return user
 
 
-class ProfileView(APIView):
-    parser_classes = [MultiPartParser, FormParser]
-    permission_classes = [permissions.IsAuthenticated]
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
 
-    def get(self, request):
-        """Get the authenticated user's profile"""
-        return Response(UserSerializer(request.user, context={"request": request}).data)
 
-    def patch(self, request):
-        """Update profile (bio, profile_picture, etc.)"""
-        serializer = ProfileUpdateSerializer(request.user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(UserSerializer(request.user, context={"request": request}).data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username", "email", "bio", "profile_picture"]
+
+
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["bio", "profile_picture"]
+        extra_kwargs = {
+            'bio': {'required': False},
+            'profile_picture': {'required': False},
+        }
