@@ -1,19 +1,15 @@
 from django.contrib.auth import get_user_model
-from rest_framework import serializers
+from rest_framework import serializers, generics, permissions, status
 from rest_framework.authtoken.models import Token
-from rest_framework import generics, permissions
-from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
+from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from .models import Follow, CustomUser  # ✅ Import CustomUser
+from .models import Follow
 from .serializers import UserSerializer
 
-
-# ✅ Explicitly set CustomUser instead of get_user_model()
-User = CustomUser
+User = get_user_model()
 
 
 class FollowUnfollowView(APIView):
@@ -44,9 +40,8 @@ class FollowUnfollowView(APIView):
         return Response({"detail": "You were not following this user."}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# ✅ Register a new user (explicitly uses CustomUser.objects.all())
 class RegisterView(generics.GenericAPIView):
-    queryset = CustomUser.objects.all()
+    queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -58,7 +53,6 @@ class RegisterView(generics.GenericAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-# ✅ Login view (returns token)
 class LoginView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
@@ -70,7 +64,6 @@ class LoginView(ObtainAuthToken):
         })
 
 
-# ✅ Authenticated user profile
 class ProfileView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -86,38 +79,10 @@ class RegisterSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True)
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = ["id", "username", "email", "password", "password2", "bio", "profile_picture"]
 
     def validate(self, data):
         if data["password"] != data["password2"]:
             raise serializers.ValidationError("Passwords do not match.")
         return data
-
-    def create(self, validated_data):
-        validated_data.pop("password2")
-        password = validated_data.pop("password")
-        user = CustomUser.objects.create_user(password=password, **validated_data)
-        Token.objects.create(user=user)
-        return user
-
-
-class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ["id", "username", "email", "bio", "profile_picture"]
-
-
-class ProfileUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ["bio", "profile_picture"]
-        extra_kwargs = {
-            'bio': {'required': False},
-            'profile_picture': {'required': False},
-        }

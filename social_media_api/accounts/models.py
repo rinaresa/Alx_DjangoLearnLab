@@ -25,7 +25,6 @@ class Follow(models.Model):
 class User(AbstractUser):
     bio = models.TextField(blank=True)
     profile_picture = models.ImageField(upload_to="profiles/", blank=True, null=True)
-    # Followers is asymmetric: if A follows B, B doesn't automatically follow A
     followers = models.ManyToManyField(
         "self",
         symmetrical=False,
