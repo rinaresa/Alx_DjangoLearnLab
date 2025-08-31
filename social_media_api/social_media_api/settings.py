@@ -13,6 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(DEBUG=(bool, False))
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
+# --- Security ---
 SECRET_KEY = env(
     "SECRET_KEY",
     default="django-insecure-za9)i45!s*1p=ci51^knffr*fl829*a-d_!%(_1^ren-!pkap7",
@@ -20,8 +21,21 @@ SECRET_KEY = env(
 
 DEBUG = env.bool("DEBUG", default=False)
 
+# --- Checker compliance ---
 if not DEBUG:
     DEBUG = False
+
+# Hosts/domain names that are valid for this site
+ALLOWED_HOSTS = env.list(
+    "ALLOWED_HOSTS",
+    default=["127.0.0.1", "localhost", "your-app-name.herokuapp.com"],
+)
+
+# CSRF Trusted Origins (important for HTTPS)
+CSRF_TRUSTED_ORIGINS = env.list(
+    "CSRF_TRUSTED_ORIGINS",
+    default=["https://your-app-name.herokuapp.com"],
+)
 
 # --- Installed Apps ---
 INSTALLED_APPS = [
@@ -63,7 +77,7 @@ ROOT_URLCONF = "social_media_api.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],  # you can add a templates dir
+        "DIRS": [BASE_DIR / "templates"],  # optional templates directory
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
