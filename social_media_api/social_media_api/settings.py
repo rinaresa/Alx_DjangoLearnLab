@@ -94,13 +94,21 @@ WSGI_APPLICATION = "social_media_api.wsgi.application"
 ASGI_APPLICATION = "social_media_api.asgi.application"
 
 # --- Database ---
+# Get database configuration from DATABASE_URL environment variable
+DATABASE_URL = env("DATABASE_URL", default=f"sqlite:///{BASE_DIR/'db.sqlite3'}")
+DB_SSL_REQUIRE = env.bool("DB_SSL_REQUIRE", default=False)
+
 DATABASES = {
     "default": dj_database_url.config(
-        default=env("DATABASE_URL", default=f"sqlite:///{BASE_DIR/'db.sqlite3'}"),
+        default=DATABASE_URL,
         conn_max_age=600,
-        ssl_require=env.bool("DB_SSL_REQUIRE", default=False),
+        ssl_require=DB_SSL_REQUIRE,
     )
 }
+
+# Explicitly set PORT if provided in environment (optional)
+if 'PORT' not in DATABASES['default'] and env('DB_PORT', default=None):
+    DATABASES['default']['PORT'] = env('DB_PORT')
 
 # --- Password validation ---
 AUTH_PASSWORD_VALIDATORS = [
