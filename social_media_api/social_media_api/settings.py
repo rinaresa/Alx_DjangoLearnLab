@@ -10,11 +10,9 @@ import django_heroku
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# --- Environment setup ---
 env = environ.Env(DEBUG=(bool, False))
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
-# --- Security ---
 SECRET_KEY = env(
     "SECRET_KEY",
     default="django-insecure-za9)i45!s*1p=ci51^knffr*fl829*a-d_!%(_1^ren-!pkap7",
@@ -22,15 +20,8 @@ SECRET_KEY = env(
 
 DEBUG = env.bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = env.list(
-    "ALLOWED_HOSTS",
-    default=["127.0.0.1", "localhost", "your-app-name.herokuapp.com"],
-)
-
-CSRF_TRUSTED_ORIGINS = env.list(
-    "CSRF_TRUSTED_ORIGINS",
-    default=["https://your-app-name.herokuapp.com"],
-)
+if not DEBUG:
+    DEBUG = False
 
 # --- Installed Apps ---
 INSTALLED_APPS = [
