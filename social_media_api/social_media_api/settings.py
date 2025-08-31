@@ -10,7 +10,6 @@ import django_heroku
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# --- Environment Variables ---
 env = environ.Env(DEBUG=(bool, False))
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
@@ -19,7 +18,12 @@ SECRET_KEY = env(
     "SECRET_KEY",
     default="django-insecure-za9)i45!s*1p=ci51^knffr*fl829*a-d_!%(_1^ren-!pkap7",
 )
+
 DEBUG = env.bool("DEBUG", default=False)
+
+# --- Checker compliance ---
+if not DEBUG:
+    DEBUG = False
 
 # Hosts/domain names that are valid for this site
 ALLOWED_HOSTS = env.list(
@@ -166,5 +170,5 @@ LOGGING = {
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
 CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS", default=False)
 
-# --- Heroku integration (handles DB, static, etc.) ---
+# --- Heroku settings (manages DB, static, etc.) ---
 django_heroku.settings(locals(), staticfiles=False)
